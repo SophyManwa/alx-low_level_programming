@@ -10,7 +10,7 @@ int main(void)
 	/*for loop and if execution*/
 	for (s = 0; s < 10; s++)
 	{
-		for (k = 0; k < 10; k++)
+		for (k = s + 1; k < 10; k++)
 		{
 			putchar((s % 10) + '0');
 			putchar((k % 10) + '0');
