@@ -9,10 +9,8 @@ int main(void)
 	char k = 'z';
 	/*while loop execution*/
 	while (k <= 'z')
-	{
-		putchar("%c", k);
-		k++;
-	}
+		putchar(k);
+		k--;
 	putchar('\n');
 	return (0);
 }
