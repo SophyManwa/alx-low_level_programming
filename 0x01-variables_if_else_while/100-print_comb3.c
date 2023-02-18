@@ -14,6 +14,7 @@ int main(void)
 		{
 			putchar((s % 10) + '0');
 			putchar((k % 10) + '0');
+			/*if execution*/
 			if (s == 9 && k == 9)
 				continue;
 			putchar(',');
