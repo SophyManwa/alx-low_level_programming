@@ -10,6 +10,7 @@ int main(void)
 	int s;
 	/*for loop execution*/
 	for (s = 0; s < 10; s++)
-		printf("%d\n", s);
+		printf("%d", s);
+	printf("\n");
 	return (0);
 }
