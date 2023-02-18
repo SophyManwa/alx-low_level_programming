@@ -6,11 +6,10 @@
  */
 int main(void)
 {
-	char k = 'z';
-	/*while loop execution*/
-	while (k <= 'z')
+	char k;
+	/*for loop execution*/
+	for (k = 'z'; k <= 'z'; k--)
 		putchar(k);
-		k--;
 	putchar('\n');
 	return (0);
 }
