@@ -1,7 +1,8 @@
 #include <stdio.h>
 
 /**
- * main - description :prints putchar followed by new line.
+ * main - main.h 
+ * Description :prints putchar followed by new line.
  * Return: 0
  */
 int main(void)
