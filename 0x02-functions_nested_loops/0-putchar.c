@@ -1,7 +1,7 @@
-#include <stdio.h>
+#include <main.h>
 
 /**
- * main - main.h
+ * main - Entry Point
  * Description :prints putchar followed by new line.
  * Return: Always 0
  */
