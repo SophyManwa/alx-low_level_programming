@@ -10,28 +10,40 @@
  */
 ssize_t read_textfile(const char *filename, size_t letters)
 {
-	ssize_t o, r, w;
-	char *buffer;
+	char *to_print;
+	ssize_t r, w;
+	int file;
 
 	if (filename == NULL)
 		return (0);
-
-	buffer = malloc(sizeof(char) * letters);
-	if (buffer == NULL)
+	to_print = malloc(sizeof(char) * letters);
+	if (to_print == NULL)
 		return (0);
-
-	o = open(filename, O_RDONLY);
-	r = read(o, buffer, letters);
-	w = write(STDOUT_FILENO, buffer, r);
-
-	if (o == -1 || r == -1 || w == -1 || w != r)
+	file = open(filename, O_RDONLY);
+	if (file < 0)
 	{
-		free(buffer);
+		free(to_print);
 		return (0);
 	}
-
-	free(buffer);
-	close(o);
-
-	return (w);
+	r = read(file, to_print, letters);
+	if (r < 0)
+	{
+		free(to_print);
+		return (0);
+	}
+	if (r > 0)
+		w = write(STDOUT_FILENO, to_print, r);
+	if (w < r)
+	{
+		free(to_print);
+		return (0);
+	}
+	w = close(file);
+	if (w < 0)
+	{
+		free(to_print);
+		return (0);
+	}
+	free(to_print);
+	return (r);
 }
