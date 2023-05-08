@@ -1,71 +1,98 @@
+#include "main.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <elf.h>
-#include <errno.h>
 
-void print_error(char *message)
+char *create_buffer(char *file);
+void close_file(int fd);
+
+/**
+ * create_buffer - Allocates 1024 bytes for a buffer.
+ * @file: The name of the file buffer is storing chars for.
+ * Return: A pointer to the newly-allocated buffer.
+ */
+char *create_buffer(char *file)
 {
-	fprintf(stderr, "Error: %s\n", message);
+char *buffer;
+
+buffer = malloc(sizeof(char) * 1024);
+
+if (buffer == NULL)
+{
+dprintf(STDERR_FILENO,
+"Error: Can't write to %s\n", file);
+exit(99);
 }
 
-void print_elf_header(Elf64_Ehdr *header)
-{
-	printf("ELF Header:\n");
-	printf("  Magic:   ");
-	for (int i = 0; i < EI_NIDENT; i++)
-	{
-		printf("%02x ", header->e_ident[i]);
-	}
-	printf("\n");
-	printf("  Class:                             %s\n", header->e_ident[EI_CLASS] == ELFCLASS64 ? "ELF64" : "unknown");
-	printf("  Data:                              %s\n", header->e_ident[EI_DATA] == ELFDATA2LSB ? "2's complement, little endian" : "unknown");
-	printf("  Version:                           %d\n", header->e_ident[EI_VERSION]);
-	printf("  OS/ABI:                            %d\n", header->e_ident[EI_OSABI]);
-	printf("  ABI Version:                       %d\n", header->e_ident[EI_ABIVERSION]);
-	printf("  Type:                              %d\n", header->e_type);
-	printf("  Entry point address:               0x%lx\n", header->e_entry);
+return (buffer);
 }
 
+/**
+ * close_file - Closes file descriptors.
+ * @fd: The file descriptor to be closed.
+ */
+void close_file(int fd)
+{
+int c;
+
+c = close(fd);
+
+if (c == -1)
+{
+dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd);
+exit(100);
+}
+}
+
+/**
+ * main - Copies the contents of a file to another file.
+ * @argc: The number of arguments supplied to the program.
+ * @argv: An array of pointers to the arguments.
+ * Return: 0 on success.
+ * Description: If the argument count is incorrect - exit code 97.
+ * If file_from does not exist or cannot be read - exit code 98.
+ * If file_to cannot be created or written to - exit code 99.
+ * If file_to or file_from cannot be closed - exit code 100.
+ */
 int main(int argc, char *argv[])
 {
-	if (argc != 2) {
-		print_error("Expected one argument");
-		exit(98);
-	}
+int from, to, r, w;
+char *buffer;
 
-	char *filename = argv[1];
-	int fd = open(filename, O_RDONLY);
-	if (fd == -1)
-	{
-		print_error("Failed to open file");
-		exit(98);
-	}
-
-	Elf64_Ehdr header;
-	ssize_t num_read = read(fd, &header, sizeof(header));
-	if (num_read == -1)
-	{
-		print_error("Failed to read ELF header");
-		exit(98);
-	}
-
-	if (num_read < sizeof(header) || header.e_ident[EI_MAG0] != ELFMAG0 || header.e_ident[EI_MAG1] != ELFMAG1 ||
-			header.e_ident[EI_MAG2] != ELFMAG2 || header.e_ident[EI_MAG3] != ELFMAG3)
-	{
-		print_error("Not an ELF file");
-		exit(98);
-	}
-
-	print_elf_header(&header);
-
-	if (close(fd) == -1)
-	{
-		print_error("Failed to close file");
-		exit(98);
-	}
-
-	return (0);
+if (argc != 3)
+{
+dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
+exit(97);
 }
 
+buffer = create_buffer(argv[2]);
+from = open(argv[1], O_RDONLY);
+r = read(from, buffer, 1024);
+to = open(argv[2], O_CREAT | O_WRONLY | O_TRUNC, 0664);
+
+do {
+if (from == -1 || r == -1)
+{
+dprintf(STDERR_FILENO,
+"Error: Can't read from file %s\n", argv[1]);
+free(buffer);
+exit(98);
+}
+w = write(to, buffer, r);
+if (to == -1 || w == -1)
+{
+dprintf(STDERR_FILENO,
+"Error: Can't write to %s\n", argv[2]);
+free(buffer);
+exit(99);
+}
+r = read(from, buffer, 1024);
+to = open(argv[2], O_WRONLY | O_APPEND);
+
+} while (r > 0);
+
+free(buffer);
+close_file(from);
+close_file(to);
+
+return (0);
+}
