@@ -3,7 +3,6 @@
 #include <string.h>
 #include <ctype.h>
 #include "main.h"
-
 /**
  * main - Program that takes in all integer arguments and returns the sum
  * @argc: Number of command line arguments
